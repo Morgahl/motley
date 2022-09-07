@@ -1,7 +1,12 @@
 [package]
 name = "motley"
 version = "0.0.1"
+authors = ["Marc Hayes <marc@hayes.dev>"]
+license = "Apache-2.0"
+description = "A architectural mocking framework backed by Rust's type system"
+respository = "https://github.com/Morgahl/motley"
 edition = "2021"
+
 
 [dependencies]
 anyhow = "1.0.64"
