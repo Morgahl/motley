@@ -1,50 +1,36 @@
+use std::fmt::{Debug, Display};
+
 use anyhow::Result;
 
-use motley::http::rest::mock::{
-    CreateMock, DeleteMock, ListMock, MockResource, ShowMock, UpdateMock,
-};
+use motley::http::rest::mock::{Mocked, Resource};
 use motley::http::rest::{
-    Create, CreateRequest, Delete, EntityRequest, List, ListRequest, Show, Update, UpdateRequest,
+    CreateRequest, DeleteRequest, ListRequest, Resource as RESTResource, ShowRequest, UpdateRequest,
 };
-use motley::http::{ContentType, ContentTyped};
+use motley::http::{ContentType, ContentTyped, StatusCode};
 use motley::Identifiable;
 
 fn main() -> Result<()> {
-    let task_resource = MockResource::<Task>::new("/tasks".to_string());
-    println!("{}", task_resource);
-    println!("{:?}", task_resource);
-    println!("{:#?}", task_resource);
-    println!(
-        "[{}]:\n{:#?}",
-        task_resource.list_path(),
-        task_resource.list(ListRequest::default())?
+    let task_resource = Resource::<Task>::new(
+        "/tasks".to_string(),
+        "task_id".to_string(),
+        Some(StatusCode::Ok),
+        Some(StatusCode::Ok),
+        Some(StatusCode::Created),
+        Some(StatusCode::Ok),
+        Some(StatusCode::NoContent),
     );
-    println!(
-        "[{}]:\n{:#?}",
-        task_resource.show_path(),
-        task_resource.show(EntityRequest::default())?
-    );
-    println!(
-        "[{}]:\n{:#?}",
-        task_resource.create_path(),
-        task_resource.create(CreateRequest::default())?
-    );
-    println!(
-        "[{}]:\n{:#?}",
-        task_resource.update_path(),
-        task_resource.update(UpdateRequest::default())?
-    );
-    println!(
-        "[{}]:\n{:#?}",
-        task_resource.delete_path(),
-        task_resource.delete(EntityRequest::default())?
-    );
-    Ok(())
+    inspect_resource(task_resource)
 }
 
 #[derive(Default, Debug)]
 struct Task {
     id: u32,
+}
+
+impl Display for Task {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Task {{ id: {} }}", self.id)
+    }
 }
 
 impl Identifiable for Task {
@@ -58,12 +44,39 @@ impl ContentTyped for Task {
     const CONTENT_TYPE: ContentType = ContentType::JSON;
 }
 
-impl ListMock for Task {}
+impl Mocked for Task {}
 
-impl ShowMock for Task {}
-
-impl CreateMock for Task {}
-
-impl UpdateMock for Task {}
-
-impl DeleteMock for Task {}
+pub fn inspect_resource<Entity: Identifiable + ContentTyped + Default + Debug + Display + Mocked>(
+    resource: Resource<Entity>,
+) -> Result<()>
+where
+    Resource<Entity>: RESTResource<Entity>,
+{
+    println!("{}", resource);
+    println!(
+        "GET {}\n{}",
+        resource.list_path(),
+        resource.list(ListRequest::default())?,
+    );
+    println!(
+        "GET {}\n{}",
+        resource.show_path(),
+        resource.show(ShowRequest::default())?,
+    );
+    println!(
+        "POST {}\n{}",
+        resource.create_path(),
+        resource.create(CreateRequest::default())?,
+    );
+    println!(
+        "PUT {}\n{}",
+        resource.update_path(),
+        resource.update(UpdateRequest::default())?,
+    );
+    println!(
+        "DELETE {}\n{}",
+        resource.delete_path(),
+        resource.delete(DeleteRequest::default())?,
+    );
+    Ok(())
+}

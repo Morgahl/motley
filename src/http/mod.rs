@@ -2,7 +2,7 @@ pub mod rest;
 
 use std::fmt::Display;
 
-use anyhow::{bail, Error, Result};
+use anyhow::{bail, Error, Result as AnyHowResult};
 
 #[derive(Debug)]
 pub struct Request<Headers, PathParams, QueryParams, Body> {
@@ -39,9 +39,22 @@ impl Default for ContentType {
     }
 }
 
+impl Display for ContentType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unknown => write!(f, "Unknown"),
+            Self::PlainText => write!(f, "text/plain"),
+            Self::HTML => write!(f, "text/html"),
+            Self::XML => write!(f, "application/xml"),
+            Self::JSON => write!(f, "application/json"),
+            Self::OctetStream => write!(f, "application/octet-stream"),
+        }
+    }
+}
+
 impl TryFrom<&str> for ContentType {
     type Error = Error;
-    fn try_from(content_type: &str) -> Result<Self> {
+    fn try_from(content_type: &str) -> AnyHowResult<Self> {
         match content_type {
             "text/plain" => Ok(ContentType::PlainText),
             "text/html" => Ok(ContentType::HTML),
@@ -55,21 +68,8 @@ impl TryFrom<&str> for ContentType {
 
 impl TryFrom<String> for ContentType {
     type Error = Error;
-    fn try_from(content_type: String) -> Result<Self> {
+    fn try_from(content_type: String) -> AnyHowResult<Self> {
         Self::try_from(content_type.as_str())
-    }
-}
-
-impl ToString for ContentType {
-    fn to_string(&self) -> String {
-        match self {
-            ContentType::Unknown => "".to_string(),
-            ContentType::PlainText => "text/plain".to_string(),
-            ContentType::HTML => "text/html".to_string(),
-            ContentType::XML => "text/xml".to_string(),
-            ContentType::JSON => "application/json".to_string(),
-            ContentType::OctetStream => "application/octet-stream".to_string(),
-        }
     }
 }
 
@@ -161,7 +161,7 @@ impl PartialEq<StatusCode> for StatusCodeCategory {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum StatusCode {
     // exists only as a default value
     Unknown,
@@ -351,84 +351,84 @@ impl From<u16> for StatusCode {
 impl Display for StatusCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            StatusCode::Unknown => write!(f, "Unknown(???)"),
+            StatusCode::Unknown => write!(f, "??? Unknown"),
 
             // 1xx Informational
-            StatusCode::Continue => write!(f, "Continue(100)"),
-            StatusCode::SwitchingProtocols => write!(f, "SwitchingProtocols(101)"),
-            StatusCode::Processing => write!(f, "Processing(102)"),
-            StatusCode::EarlyHints => write!(f, "EarlyHints(103)"),
+            StatusCode::Continue => write!(f, "100 Continue"),
+            StatusCode::SwitchingProtocols => write!(f, "101 Switching Protocols"),
+            StatusCode::Processing => write!(f, "102 Processing"),
+            StatusCode::EarlyHints => write!(f, "103 Early Hints"),
 
             // 2xx Success
-            StatusCode::Ok => write!(f, "Ok(200)"),
-            StatusCode::Created => write!(f, "Created(201)"),
-            StatusCode::Accepted => write!(f, "Accepted(202)"),
+            StatusCode::Ok => write!(f, "200 OK"),
+            StatusCode::Created => write!(f, "201 Created"),
+            StatusCode::Accepted => write!(f, "202 Accepted"),
             StatusCode::NonAuthoritativeInformation => {
-                write!(f, "NonAuthoritativeInformation(203)")
+                write!(f, "203 Non-Authoritative Information")
             }
-            StatusCode::NoContent => write!(f, "NoContent(204)"),
-            StatusCode::ResetContent => write!(f, "ResetContent(205)"),
-            StatusCode::PartialContent => write!(f, "PartialContent(206)"),
-            StatusCode::MultiStatus => write!(f, "MultiStatus(207)"),
-            StatusCode::AlreadyReported => write!(f, "AlreadyReported(208)"),
-            StatusCode::IMUsed => write!(f, "IMUsed(226)"),
+            StatusCode::NoContent => write!(f, "204 No Content"),
+            StatusCode::ResetContent => write!(f, "205 Reset Content"),
+            StatusCode::PartialContent => write!(f, "206 Partial Content"),
+            StatusCode::MultiStatus => write!(f, "207 Multi Status"),
+            StatusCode::AlreadyReported => write!(f, "208 Already Reported"),
+            StatusCode::IMUsed => write!(f, "226 IM Used"),
 
             // 3xx Redirection
-            StatusCode::MultipleChoices => write!(f, "MultipleChoices(300)"),
-            StatusCode::MovedPermanently => write!(f, "MovedPermanently(301)"),
-            StatusCode::Found => write!(f, "Found(302)"),
-            StatusCode::SeeOther => write!(f, "SeeOther(303)"),
-            StatusCode::NotModified => write!(f, "NotModified(304)"),
-            StatusCode::UseProxy => write!(f, "UseProxy(305)"),
-            StatusCode::TemporaryRedirect => write!(f, "TemporaryRedirect(307)"),
-            StatusCode::PermanentRedirect => write!(f, "PermanentRedirect(308)"),
+            StatusCode::MultipleChoices => write!(f, "300 Multiple Choices"),
+            StatusCode::MovedPermanently => write!(f, "301 Moved Permanently"),
+            StatusCode::Found => write!(f, "302 Found"),
+            StatusCode::SeeOther => write!(f, "303 See Other"),
+            StatusCode::NotModified => write!(f, "304 Not Modified"),
+            StatusCode::UseProxy => write!(f, "305 Use Proxy"),
+            StatusCode::TemporaryRedirect => write!(f, "307 Temporary Redirect"),
+            StatusCode::PermanentRedirect => write!(f, "308 Permanent Redirect"),
 
             // 4xx Client Error
-            StatusCode::BadRequest => write!(f, "BadRequest(400)"),
-            StatusCode::Unauthorized => write!(f, "Unauthorized(401)"),
-            StatusCode::Forbidden => write!(f, "Forbidden(403)"),
-            StatusCode::NotFound => write!(f, "NotFound(404)"),
-            StatusCode::MethodNotAllowed => write!(f, "MethodNotAllowed(405)"),
-            StatusCode::NotAcceptable => write!(f, "NotAcceptable(406)"),
-            StatusCode::Conflict => write!(f, "Conflict(409)"),
-            StatusCode::Gone => write!(f, "Gone(410)"),
-            StatusCode::LengthRequired => write!(f, "LengthRequired(411)"),
-            StatusCode::PreconditionFailed => write!(f, "PreconditionFailed(412)"),
-            StatusCode::PayloadTooLarge => write!(f, "PayloadTooLarge(413)"),
-            StatusCode::URITooLong => write!(f, "URITooLong(414)"),
-            StatusCode::UnsupportedMediaType => write!(f, "UnsupportedMediaType(415)"),
-            StatusCode::RangeNotSatisfiable => write!(f, "RangeNotSatisfiable(416)"),
-            StatusCode::ExpectationFailed => write!(f, "ExpectationFailed(417)"),
-            StatusCode::ImATeapot => write!(f, "ImATeapot(418)"),
-            StatusCode::EnhanceYourCalm => write!(f, "EnhanceYourCalm(420)"),
-            StatusCode::MisdirectedRequest => write!(f, "MisdirectedRequest(421)"),
-            StatusCode::UnprocessableEntity => write!(f, "UnprocessableEntity(422)"),
-            StatusCode::Locked => write!(f, "Locked(423)"),
-            StatusCode::FailedDependency => write!(f, "FailedDependency(424)"),
-            StatusCode::TooEarly => write!(f, "TooEarly(425)"),
-            StatusCode::UpgradeRequired => write!(f, "UpgradeRequired(426)"),
-            StatusCode::PreconditionRequired => write!(f, "PreconditionRequired(428)"),
-            StatusCode::TooManyRequests => write!(f, "TooManyRequests(429)"),
+            StatusCode::BadRequest => write!(f, "400 Bad Request"),
+            StatusCode::Unauthorized => write!(f, "401 Unauthorized"),
+            StatusCode::Forbidden => write!(f, "403 Forbidden"),
+            StatusCode::NotFound => write!(f, "404 Not Found"),
+            StatusCode::MethodNotAllowed => write!(f, "405 Method Not Allowed"),
+            StatusCode::NotAcceptable => write!(f, "406 Not Acceptable"),
+            StatusCode::Conflict => write!(f, "409 Conflict"),
+            StatusCode::Gone => write!(f, "410 Gone"),
+            StatusCode::LengthRequired => write!(f, "411 Length Required"),
+            StatusCode::PreconditionFailed => write!(f, "412 Precondition Failed"),
+            StatusCode::PayloadTooLarge => write!(f, "413 Payload Too Large"),
+            StatusCode::URITooLong => write!(f, "414 URI Too Long"),
+            StatusCode::UnsupportedMediaType => write!(f, "415 Unsupported Media Type"),
+            StatusCode::RangeNotSatisfiable => write!(f, "416 Range Not Satisfiable"),
+            StatusCode::ExpectationFailed => write!(f, "417 Expectation Failed"),
+            StatusCode::ImATeapot => write!(f, "418 Im A Teapot"),
+            StatusCode::EnhanceYourCalm => write!(f, "420 Enhance Your Calm"),
+            StatusCode::MisdirectedRequest => write!(f, "421 Misdirected Request"),
+            StatusCode::UnprocessableEntity => write!(f, "422 Unprocessable Entity"),
+            StatusCode::Locked => write!(f, "423 Locked"),
+            StatusCode::FailedDependency => write!(f, "424 Failed Dependency"),
+            StatusCode::TooEarly => write!(f, "425 Too Early"),
+            StatusCode::UpgradeRequired => write!(f, "426 Upgrade Required"),
+            StatusCode::PreconditionRequired => write!(f, "428 Precondition Required"),
+            StatusCode::TooManyRequests => write!(f, "429 Too Many Requests"),
             StatusCode::RequestHeaderFieldsTooLarge => {
-                write!(f, "RequestHeaderFieldsTooLarge(431)")
+                write!(f, "431 Request Heade rFields Too Large")
             }
             StatusCode::UnavailableForLegalReasons => {
-                write!(f, "UnavailableForLegalReasons(451)")
+                write!(f, "451 Unavailable For Lega lReasons")
             }
 
             // 5xx Server Error
-            StatusCode::InternalServerError => write!(f, "InternalServerError(500)"),
-            StatusCode::NotImplemented => write!(f, "NotImplemented(501)"),
-            StatusCode::BadGateway => write!(f, "BadGateway(502)"),
-            StatusCode::ServiceUnavailable => write!(f, "ServiceUnavailable(503)"),
-            StatusCode::GatewayTimeout => write!(f, "GatewayTimeout(504)"),
-            StatusCode::HTTPVersionNotSupported => write!(f, "HTTPVersionNotSupported(505)"),
-            StatusCode::VariantAlsoNegotiates => write!(f, "VariantAlsoNegotiates(506)"),
-            StatusCode::InsufficientStorage => write!(f, "InsufficientStorage(507)"),
-            StatusCode::LoopDetected => write!(f, "LoopDetected(508)"),
-            StatusCode::NotExtended => write!(f, "NotExtended(510)"),
+            StatusCode::InternalServerError => write!(f, "500 Internal Server Error"),
+            StatusCode::NotImplemented => write!(f, "501 Not Implemented"),
+            StatusCode::BadGateway => write!(f, "502 Bad Gateway"),
+            StatusCode::ServiceUnavailable => write!(f, "503 Service Unavailable"),
+            StatusCode::GatewayTimeout => write!(f, "504 Gateway Timeout"),
+            StatusCode::HTTPVersionNotSupported => write!(f, "505 HTTP Version Not Supported"),
+            StatusCode::VariantAlsoNegotiates => write!(f, "506 Variant Also Negotiates"),
+            StatusCode::InsufficientStorage => write!(f, "507 Insufficient Storage"),
+            StatusCode::LoopDetected => write!(f, "508 Loop Detected"),
+            StatusCode::NotExtended => write!(f, "510 Not Extended"),
             StatusCode::NetworkAuthenticationRequired => {
-                write!(f, "NetworkAuthenticationRequired(511)")
+                write!(f, "511 Network Authentication Required")
             }
         }
     }
