@@ -99,7 +99,7 @@ impl<Entity: Identifiable> ShowRequest<Entity> {
     }
 }
 
-impl<Entity: Identifiable> Display for ShowRequest<Entity> {
+impl<Entity: Identifiable + Display> Display for ShowRequest<Entity> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "ShowRequest {{ path_params: {} }}", self.0.path_params)
     }
@@ -299,7 +299,7 @@ impl<Entity: Identifiable> DeleteRequest<Entity> {
     }
 }
 
-impl<Entity: Identifiable> Display for DeleteRequest<Entity> {
+impl<Entity: Identifiable + Display> Display for DeleteRequest<Entity> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "DeleteRequest {{ path_params: {} }}", self.0.path_params)
     }
@@ -354,7 +354,7 @@ pub struct EntityIdentificationParameters<Entity: Identifiable> {
     pub entity_id: Entity::Id,
 }
 
-impl<Entity: Identifiable> Display for EntityIdentificationParameters<Entity> {
+impl<Entity: Identifiable + Display> Display for EntityIdentificationParameters<Entity> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

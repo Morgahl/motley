@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 
 use anyhow::Result;
 
-use crate::{http::StatusCode, Identifiable};
+use crate::{transport::http::StatusCode, Identifiable};
 
 use super::{
     ContentTyped, CreateRequest, CreateResponse, DeleteRequest, DeleteResponse, ListRequest,

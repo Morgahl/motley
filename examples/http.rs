@@ -2,11 +2,11 @@ use std::fmt::{Debug, Display};
 
 use anyhow::Result;
 
-use motley::http::rest::mock::{Mocked, Resource};
-use motley::http::rest::{
+use motley::transport::http::rest::mock::{Mocked, Resource};
+use motley::transport::http::rest::{
     CreateRequest, DeleteRequest, ListRequest, Resource as RESTResource, ShowRequest, UpdateRequest,
 };
-use motley::http::{ContentType, ContentTyped, StatusCode};
+use motley::transport::http::{ContentType, ContentTyped, StatusCode};
 use motley::Identifiable;
 
 fn main() -> Result<()> {
