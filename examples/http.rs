@@ -38,6 +38,9 @@ impl Identifiable for Task {
     fn id(&self) -> Self::Id {
         self.id
     }
+    fn set_id(&mut self, id: Self::Id) {
+        self.id = id;
+    }
 }
 
 impl ContentTyped for Task {
@@ -46,7 +49,7 @@ impl ContentTyped for Task {
 
 impl Mocked for Task {}
 
-pub fn inspect_resource<Entity: Identifiable + ContentTyped + Default + Debug + Display + Mocked>(
+pub fn inspect_resource<Entity: ContentTyped + Default + Display + Identifiable>(
     resource: Resource<Entity>,
 ) -> Result<()>
 where
