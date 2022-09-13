@@ -1,8 +1,5 @@
 pub mod http;
 
-use std::{fmt::Display, hash::Hash};
+mod entity;
 
-pub trait Identifiable {
-    type Id: Eq + Hash + Default + Display;
-    fn id(&self) -> Self::Id;
-}
+pub use entity::{Data, Entity, Foo, Identifier};

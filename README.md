@@ -1,4 +1,9 @@
 # Motley - Patterns for mocking architecture
+behavioral definitions creating structured restrictions
+
+IE build your puzzle and THEN solve it.
+
+
 Let's do an actor mocking library that
 1. Validates the soundness of the mocked actors by the fact that it actually compiles
 2. Validates the patterns of actor interactions with a simple test suite.

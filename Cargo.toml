@@ -10,3 +10,5 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.64"
+http = "0.2.8"
+urlencoding = "2.1.2"
