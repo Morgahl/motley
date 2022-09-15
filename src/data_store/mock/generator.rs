@@ -53,7 +53,7 @@ impl Iterator for AutoIncrement<i8> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -63,7 +63,7 @@ impl Iterator for AutoIncrement<i16> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -73,7 +73,7 @@ impl Iterator for AutoIncrement<i32> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -83,7 +83,7 @@ impl Iterator for AutoIncrement<i64> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -93,7 +93,7 @@ impl Iterator for AutoIncrement<i128> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -103,7 +103,7 @@ impl Iterator for AutoIncrement<isize> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -113,7 +113,7 @@ impl Iterator for AutoIncrement<u8> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -123,7 +123,7 @@ impl Iterator for AutoIncrement<u16> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -133,7 +133,7 @@ impl Iterator for AutoIncrement<u32> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -143,7 +143,7 @@ impl Iterator for AutoIncrement<u64> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -153,7 +153,7 @@ impl Iterator for AutoIncrement<u128> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }
@@ -163,7 +163,7 @@ impl Iterator for AutoIncrement<usize> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let id = self.0;
-        self.0 = self.0 + 1;
+        self.0 = self.0.checked_add(1)?;
         Some(id)
     }
 }

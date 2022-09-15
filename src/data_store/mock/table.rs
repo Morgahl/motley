@@ -1,45 +1,38 @@
-use std::collections::HashMap;
+use std::{
+    collections::{BTreeMap, HashMap},
+    marker::PhantomData,
+};
 
 use uuid::Uuid;
 
 use crate::{
-    data_store::{AutoIncrement, DataStoreError, Table as CRUDTable, UUIDv4},
+    data_store::{DataStoreError, Table as CRUDTable},
     Identifiable,
 };
 
-pub struct Table<Record: Identifiable + Clone, Generator: Iterator<Item = Record::Id>> {
+use super::{AutoIncrement, UUIDv4};
+
+pub struct Table<
+    Record: Identifiable + Clone,
+    Generator: Iterator<Item = Record::Id>,
+    Store = BTreeMap<<Record as Identifiable>::Id, Record>,
+> {
     name: &'static str,
     generator: Generator,
-    store: HashMap<Record::Id, Record>,
+    store: Store,
+    _phantom_record: PhantomData<Record>,
 }
 
 impl<Record: Identifiable + Clone, Generator: Iterator<Item = Record::Id>>
     Table<Record, Generator>
 {
-    pub fn new(name: &'static str, gen: Generator) -> Self {
+    pub fn new(name: &'static str, generator: Generator) -> Self {
         Self {
             name,
-            generator: gen,
-            store: HashMap::new(),
+            generator,
+            store: BTreeMap::new(),
+            _phantom_record: PhantomData,
         }
-    }
-}
-
-impl<Record: Identifiable<Id = Uuid> + Clone> Table<Record, UUIDv4<Uuid>> {
-    pub fn uuid_v4(name: &'static str) -> Self {
-        Self::new(name, UUIDv4::new())
-    }
-}
-
-impl<Record: Identifiable<Id = String> + Clone> Table<Record, UUIDv4<String>> {
-    pub fn uuid_v4(name: &'static str) -> Self {
-        Self::new(name, UUIDv4::new())
-    }
-}
-
-impl<Record: Identifiable<Id = u128> + Clone> Table<Record, UUIDv4<u128>> {
-    pub fn uuid_v4(name: &'static str) -> Self {
-        Self::new(name, UUIDv4::new())
     }
 }
 
@@ -115,11 +108,49 @@ impl<Record: Identifiable<Id = usize> + Clone> Table<Record, AutoIncrement<usize
     }
 }
 
+impl<Record: Identifiable<Id = Uuid> + Clone>
+    Table<Record, UUIDv4<Uuid>, HashMap<Record::Id, Record>>
+{
+    pub fn uuid_v4(name: &'static str) -> Self {
+        Self {
+            name,
+            generator: UUIDv4::new(),
+            store: HashMap::new(),
+            _phantom_record: PhantomData,
+        }
+    }
+}
+
+impl<Record: Identifiable<Id = String> + Clone>
+    Table<Record, UUIDv4<String>, HashMap<Record::Id, Record>>
+{
+    pub fn uuid_v4(name: &'static str) -> Self {
+        Self {
+            name,
+            generator: UUIDv4::new(),
+            store: HashMap::new(),
+            _phantom_record: PhantomData,
+        }
+    }
+}
+
+impl<Record: Identifiable<Id = u128> + Clone>
+    Table<Record, UUIDv4<u128>, HashMap<Record::Id, Record>>
+{
+    pub fn uuid_v4(name: &'static str) -> Self {
+        Self {
+            name,
+            generator: UUIDv4::new(),
+            store: HashMap::new(),
+            _phantom_record: PhantomData,
+        }
+    }
+}
+
 impl<Record: Identifiable + Clone, Generator: Iterator<Item = Record::Id>> CRUDTable
     for Table<Record, Generator>
 {
     type Record = Record;
-    type Generator = Generator;
 
     fn name(&self) -> &'static str {
         self.name
@@ -128,27 +159,30 @@ impl<Record: Identifiable + Clone, Generator: Iterator<Item = Record::Id>> CRUDT
     fn list<Ids: IntoIterator<Item = Record::Id>>(
         &self,
         ids: Ids,
+        limit: Option<usize>,
+        offset: Option<usize>,
     ) -> Result<Vec<Record>, DataStoreError<Record>> {
-        Ok((ids.into_iter())
+        let offset = offset.unwrap_or(0);
+        let limit = limit.unwrap_or(Self::LIST_DEFAULT).clamp(1, Self::LIST_MAX);
+        let records = (ids.into_iter())
+            .skip(offset)
+            .take(limit)
             .filter_map(|id| self.store.get(&id).cloned())
-            .collect())
+            .fold(Vec::with_capacity(limit), |mut acc, record| {
+                acc.push(record);
+                acc
+            });
+        Ok(records)
     }
 
     fn create(&mut self, mut record: Record) -> Result<Record, DataStoreError<Record>> {
-        let id = record.id();
-        match self.store.contains_key(&id) {
-            true => Err(DataStoreError::RecordNotUnique {
-                id,
-                table: self.name,
-            }),
-            false => match self.generator.next() {
-                Some(id) => {
-                    record.set_id(id);
-                    self.store.insert(id, record.clone());
-                    Ok(record)
-                }
-                None => Err(DataStoreError::GeneratorExhausted { table: self.name }),
-            },
+        match self.generator.next() {
+            None => Err(DataStoreError::GeneratorExhausted { table: self.name }),
+            Some(id) => {
+                record.set_id(id);
+                self.store.insert(id, record.clone());
+                Ok(record)
+            }
         }
     }
 
