@@ -35,8 +35,13 @@ impl Display for Task {
 
 impl Identifiable for Task {
     type Id = u32;
+
     fn id(&self) -> Self::Id {
         self.id
+    }
+
+    fn set_id(&mut self, id: Self::Id) {
+        self.id = id;
     }
 }
 
@@ -51,6 +56,7 @@ pub fn inspect_resource<Entity: Identifiable + ContentTyped + Default + Debug + 
 ) -> Result<()>
 where
     Resource<Entity>: RESTResource<Entity>,
+    Entity::Id: Default,
 {
     println!("{}", resource);
     println!(
