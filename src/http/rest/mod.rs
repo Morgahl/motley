@@ -105,7 +105,10 @@ impl<Entity: Identifiable> Display for ShowRequest<Entity> {
     }
 }
 
-impl<Entity: Identifiable + Default> Default for ShowRequest<Entity> {
+impl<Entity: Identifiable + Default> Default for ShowRequest<Entity>
+where
+    Entity::Id: Default,
+{
     fn default() -> Self {
         Self::new(Default::default())
     }
@@ -244,7 +247,10 @@ impl<Entity: Identifiable + ContentTyped + Display> Display for UpdateRequest<En
     }
 }
 
-impl<Entity: Identifiable + ContentTyped + Default> Default for UpdateRequest<Entity> {
+impl<Entity: Identifiable + ContentTyped + Default> Default for UpdateRequest<Entity>
+where
+    Entity::Id: Default,
+{
     fn default() -> Self {
         Self::new(Default::default(), Default::default(), Default::default())
     }
@@ -305,7 +311,10 @@ impl<Entity: Identifiable> Display for DeleteRequest<Entity> {
     }
 }
 
-impl<Entity: Identifiable + Default> Default for DeleteRequest<Entity> {
+impl<Entity: Identifiable + Default> Default for DeleteRequest<Entity>
+where
+    Entity::Id: Default,
+{
     fn default() -> Self {
         Self::new(Default::default())
     }
